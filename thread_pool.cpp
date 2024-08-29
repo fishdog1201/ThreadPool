@@ -53,6 +53,7 @@ void ThreadPool::start(int initThreadNums)
 
 void ThreadPool::threadFunc()
 {
+    std::cout << "this task tid: " << std::this_thread::get_id() << std::endl;
     for (;;) {
         std::shared_ptr<Task> task;
         {
