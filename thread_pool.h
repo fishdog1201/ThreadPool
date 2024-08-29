@@ -23,7 +23,15 @@ public:
 
 class Thread
 {
+    using threadFunc = std::function<void()>;
 
+    Thread(threadFunc);
+
+    ~Thread();
+
+    void start();
+private:
+    threadFunc func_;
 };
 
 class ThreadPool
@@ -33,12 +41,14 @@ public:
     ~ThreadPool();
 
     void setMode(PoolMode mode);
-    void start();
+    void start(int initThreadNums = 4);
     void setTaskCapacity(size_t capacity);
     void submitTask(std::shared_ptr<Task> task);
 private:
-    std::vector<Thread*> threads_;
-    size_t initThreadNums;
+    void threadFunc();
+private:
+    std::vector<std::unique_ptr<Thread>> threads_;
+    size_t initThreadNums_;
 
     std::queue<std::shared_ptr<Task>> taskQueue_;
     std::atomic_uint taskNums_;
