@@ -7,6 +7,10 @@
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
+#include <functional>
+#include <thread>
+#include <iostream>
+#include <chrono>
 
 enum class PoolMode {
     MODE_FIXED,
@@ -23,6 +27,7 @@ public:
 
 class Thread
 {
+public:
     using threadFunc = std::function<void()>;
 
     Thread(threadFunc);

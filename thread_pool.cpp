@@ -1,8 +1,4 @@
 #include "thread_pool.h"
-#include <thread>
-#include <iostream>
-#include <chrono>
-#include <functional>
 
 const int TASK_CAPACITY = 1024;
 
@@ -25,9 +21,10 @@ void ThreadPool::submitTask(std::shared_ptr<Task> task)
 {
     // get mutex
     std::unique_lock<std::mutex> lck(taskQueueMtx_);
+    std::cout << "Get lock and submit task\n";
     // communication between threads
     if (!notFull_.wait_for(lck, std::chrono::seconds(1), [&]() -> bool {
-        return taskQueue_.size() < static_cast<size_t>(taskCapacity_);
+        return taskQueue_.size() < taskCapacity_;
     })) {
         std::cerr << "Task queue is full, submit task failed!\n";
         return;
@@ -56,16 +53,16 @@ void ThreadPool::start(int initThreadNums)
 
 void ThreadPool::threadFunc()
 {
-    std::cout << "Begin threadFunc tid: " << std::this_thread::get_id() << std::endl;
-
     for (;;) {
         std::shared_ptr<Task> task;
         {
             std::unique_lock<std::mutex> lck(taskQueueMtx_);
             notEmpty_.wait(lck, [&]() -> bool {
+                std::cout << "Waiting for tasks...\n";
                 return taskQueue_.size() > 0;
             });
 
+            std::cout << "Get task!\n";
             task = taskQueue_.front();
             taskQueue_.pop();
             taskNums_--;
@@ -82,8 +79,7 @@ void ThreadPool::threadFunc()
         }
 
     }
-
-    std::cout << "End threadFunc tid: " << std::this_thread::get_id() << std::endl;
+    return;
 }
 
 Thread::Thread(threadFunc func)
